@@ -132,6 +132,22 @@ class TestStringCalculator(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.calculator.add("//*\n4*abc*6")
 
+    def test_multiple_custom_delimiters(self):
+        """Test support for multiple custom delimiters."""
+        self.assertEqual(self.calculator.add("//;\n1;2;3\n4"), 10)
+
+    def test_large_numbers(self):
+        """Test handling of large numbers."""
+        self.assertEqual(self.calculator.add("1000,2000,3000"), 6000)
+
+    def test_consecutive_delimiters(self):
+        """Test consecutive delimiters."""
+        self.assertEqual(self.calculator.add("1,,2"), 3)
+
+    def test_whitespace_around_numbers(self):
+        """Test numbers with surrounding whitespace."""
+        self.assertEqual(self.calculator.add(" 1 , 2 "), 3)
+
 
 if __name__ == "__main__":
     unittest.main()
