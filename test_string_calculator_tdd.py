@@ -1,10 +1,12 @@
+import re
+
 class StringCalculator:
     def add(self, numbers: str) -> int:
         """
-        Computes the sum of numbers provided as a string separated by commas.
+        Computes the sum of numbers provided as a string separated by commas or newlines.
 
         Args:
-            numbers (str): The input string containing numbers separated by commas.
+            numbers (str): The input string containing numbers separated by delimiters.
 
         Returns:
             int: The sum of the numbers in the input string.
@@ -12,7 +14,8 @@ class StringCalculator:
         if not numbers:
             return 0
 
-        number_list = numbers.split(",")
+        # Split by commas or newlines
+        number_list = re.split(r",|\n", numbers)
         return sum(int(num) for num in number_list if num)
 
 
@@ -34,6 +37,11 @@ class TestStringCalculator(unittest.TestCase):
     def test_two_numbers_comma_separated(self):
         """Test that two comma-separated numbers are summed correctly."""
         self.assertEqual(self.calculator.add("1,2"), 3)
+
+    def test_multiple_numbers_with_commas_and_newlines(self):
+        """Test that numbers separated by commas and newlines are summed correctly."""
+        self.assertEqual(self.calculator.add("1,2\n3"), 6)
+        self.assertEqual(self.calculator.add("4\n5,6"), 15)
 
 if __name__ == "__main__":
     unittest.main()
