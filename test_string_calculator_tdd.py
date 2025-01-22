@@ -1,6 +1,17 @@
 import re
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class StringCalculator:
+    def __init__(self):
+        """
+        Initializes the StringCalculator with default delimiters (comma and newline).
+        """
+        self.default_delimiters = [",", "\n"]
+        logging.info("StringCalculator initialized with default delimiters: %s", self.default_delimiters)
+
     def add(self, numbers: str) -> int:
         """
         Computes the sum of numbers provided as a string.
@@ -12,7 +23,10 @@ class StringCalculator:
         Returns:
             int: The sum of the numbers in the input string.
         """
+        logging.info("Adding numbers: %s", numbers)
+
         if not numbers:
+            logging.info("Input is empty, returning 0.")
             return 0
 
         # Check for custom delimiter
@@ -20,16 +34,21 @@ class StringCalculator:
         if numbers.startswith("//"):
             delimiter_section, numbers = numbers.split("\n", 1)
             custom_delimiter = re.escape(delimiter_section[2:])
+            logging.info("Custom delimiter detected: %s", custom_delimiter)
 
         # Combine default delimiters with custom delimiter (if any)
-        delimiters = [",", "\n"]
+        delimiters = self.default_delimiters.copy()
         if custom_delimiter:
             delimiters.append(custom_delimiter)
 
         # Split numbers using the delimiters
         split_pattern = "|".join(map(re.escape, delimiters))
         number_list = re.split(split_pattern, numbers)
-        return sum(int(num) for num in number_list if num)
+        logging.debug("Numbers split into: %s", number_list)
+
+        total = sum(int(num) for num in number_list if num)
+        logging.info("Computed sum: %d", total)
+        return total
 
 
 # Unit tests
