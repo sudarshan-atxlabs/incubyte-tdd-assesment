@@ -127,6 +127,11 @@ class TestStringCalculator(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.calculator.add("1,abc")
 
+    def test_invalid_custom_delimiter_number(self):
+        """Test that invalid numbers with custom delimiters raise a ValueError."""
+        with self.assertRaises(ValueError):
+            self.calculator.add("//*\n4*abc*6")
+
 
 if __name__ == "__main__":
     unittest.main()
