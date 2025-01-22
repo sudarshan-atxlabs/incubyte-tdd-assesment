@@ -33,16 +33,15 @@ class StringCalculator:
         custom_delimiter = None
         if numbers.startswith("//"):
             delimiter_section, numbers = numbers.split("\n", 1)
-            custom_delimiter = re.escape(delimiter_section[2:])
-            logging.info("Custom delimiter detected: %s", custom_delimiter)
+            custom_delimiter = delimiter_section[2:]
 
         # Combine default delimiters with custom delimiter (if any)
-        delimiters = self.default_delimiters.copy()
+        delimiters = [",", "\n"]
         if custom_delimiter:
-            delimiters.append(custom_delimiter)
+            delimiters.append(re.escape(custom_delimiter))  # Ensure proper escaping of special characters
 
         # Split numbers using the delimiters
-        split_pattern = "|".join(map(re.escape, delimiters))
+        split_pattern = "|".join(delimiters)
         number_list = re.split(split_pattern, numbers)
         logging.debug("Numbers split into: %s", number_list)
 
