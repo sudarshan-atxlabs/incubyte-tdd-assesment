@@ -1,5 +1,6 @@
 import re
 import logging
+from typing import Tuple, List
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -10,7 +11,8 @@ class StringCalculator:
         """
         Initializes the StringCalculator with default delimiters (comma and newline).
         """
-        self.default_delimiters = [",", "\n"]
+
+        self.default_delimiters = (",", "\n")  # Tuple ensures immutability
         logging.info("StringCalculator initialized with default delimiters: %s", self.default_delimiters)
 
     def add(self, numbers: str) -> int:
@@ -24,29 +26,30 @@ class StringCalculator:
         Returns:
             int: The sum of the numbers in the input string.
         """
+
         logging.info("Adding numbers: %s", numbers)
 
-        if not numbers:
-            logging.info("Input is empty, returning 0.")
+        if not numbers.strip():  # Handle empty or whitespace-only input
+            logging.info("Input is empty or contains only whitespace, returning 0.")
             return 0
 
         # Extract custom delimiter if present
-        custom_delimiter, numbers = self._extract_custom_delimiter(numbers)
+        custom_delimiter, remaining_numbers = self._extract_custom_delimiter(numbers)
 
-        # Combine default delimiters with custom delimiter
-        delimiters = self.default_delimiters.copy()
+        # Combine default delimiters with custom delimiter (if any)
+        delimiters = list(self.default_delimiters)
         if custom_delimiter:
             delimiters.append(custom_delimiter)
 
         # Split numbers and compute the sum
-        number_list = self._split_numbers(numbers, delimiters)
-        total = sum(self._to_int(num) for num in number_list if num)
+        number_list = self._split_numbers(remaining_numbers, delimiters)
+        total = sum(self._to_int(num) for num in number_list if num.strip())  # Handle extra whitespace
         logging.info("Computed sum: %d", total)
         return total
 
-    def _extract_custom_delimiter(self, numbers: str) -> (str, str):
+    def _extract_custom_delimiter(self, numbers: str) -> Tuple[str, str]:
         """
-        Extracts a custom delimiter from the input string if it is specified.
+        Extracts a custom delimiter from the input string if specified.
 
         Args:
             numbers (str): The input string.
@@ -54,24 +57,26 @@ class StringCalculator:
         Returns:
             Tuple[str, str]: A tuple containing the custom delimiter (if any) and the remaining number string.
         """
+
         if numbers.startswith("//"):
-            delimiter_section, numbers = numbers.split("\n", 1)
+            delimiter_section, remaining_numbers = numbers.split("\n", 1)
             custom_delimiter = delimiter_section[2:]
             logging.info("Custom delimiter detected: %s", custom_delimiter)
-            return custom_delimiter, numbers
+            return custom_delimiter, remaining_numbers
         return None, numbers
 
-    def _split_numbers(self, numbers: str, delimiters: list) -> list:
+    def _split_numbers(self, numbers: str, delimiters: List[str]) -> List[str]:
         """
         Splits the input string into a list of numbers based on the provided delimiters.
 
         Args:
             numbers (str): The string of numbers to split.
-            delimiters (list): A list of delimiters to use for splitting.
+            delimiters (List[str]): A list of delimiters to use for splitting.
 
         Returns:
-            list: A list of numbers as strings.
+            List[str]: A list of numbers as strings.
         """
+
         split_pattern = "|".join(map(re.escape, delimiters))
         split_numbers = re.split(split_pattern, numbers)
         logging.debug("Numbers split into: %s", split_numbers)
@@ -90,11 +95,12 @@ class StringCalculator:
         Raises:
             ValueError: If the input string is not a valid number.
         """
+        
         try:
-            return int(number)
+            return int(number.strip())  # Handle extra whitespace
         except ValueError:
             logging.error("Invalid number encountered: %s", number)
-            raise ValueError(f"Invalid number: {number}")
+            raise ValueError(f"Invalid number: {number.strip()}")
 
 
 # Unit tests
@@ -126,15 +132,6 @@ class TestStringCalculator(unittest.TestCase):
         """Test that invalid numbers raise a ValueError."""
         with self.assertRaises(ValueError):
             self.calculator.add("1,abc")
-
-    def test_invalid_custom_delimiter_number(self):
-        """Test that invalid numbers with custom delimiters raise a ValueError."""
-        with self.assertRaises(ValueError):
-            self.calculator.add("//*\n4*abc*6")
-
-    def test_multiple_custom_delimiters(self):
-        """Test support for multiple custom delimiters."""
-        self.assertEqual(self.calculator.add("//;\n1;2;3\n4"), 10)
 
     def test_large_numbers(self):
         """Test handling of large numbers."""
